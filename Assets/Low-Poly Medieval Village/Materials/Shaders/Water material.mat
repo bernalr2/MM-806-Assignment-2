@@ -127,6 +127,7 @@ Material:
     - _SrcBlend: 1
     - _Surface: 0
     - _WorkflowMode: 1
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
     - Color_10755e5147de4b018d4fb7cd0df1e40f: {r: 0.2980392, g: 0.78039217, b: 0.8784314, a: 1}
