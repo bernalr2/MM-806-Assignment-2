@@ -12218,7 +12218,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &719977020
 Transform:
   m_ObjectHideFlags: 0
@@ -12241,7 +12241,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 719977019}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e131557ae4edfd44ad2d3d43141eef8, type: 3}
   m_Name: 
@@ -17177,6 +17177,8 @@ GameObject:
   m_Component:
   - component: {fileID: 952726489}
   - component: {fileID: 952726490}
+  - component: {fileID: 952726491}
+  - component: {fileID: 952726492}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -17225,6 +17227,39 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &952726491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952726488}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c404fee93e054c4db6cd2a9aef84c22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRLookWalk
+  vrCamera: {fileID: 122715512}
+  toggleAngle: 30
+  speed: 3
+  moveForward: 0
+--- !u!114 &952726492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 952726488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e131557ae4edfd44ad2d3d43141eef8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirstPersonModeController
+  cameraTransform: {fileID: 122715512}
+  characterController: {fileID: 952726490}
+  cameraSensitivity: 10
+  moveSpeed: 8
+  moveInputDeadZone: 10
 --- !u!1 &977940332
 GameObject:
   m_ObjectHideFlags: 0

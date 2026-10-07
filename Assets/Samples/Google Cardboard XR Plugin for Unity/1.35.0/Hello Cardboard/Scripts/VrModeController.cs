@@ -109,9 +109,10 @@ public class VrModeController : MonoBehaviour
         else
         {
             // TODO(b/171727815): Add a button to switch to VR mode.
+            // TODO: Create menus that allow for switching between VR and Normal
             if (_isScreenTouched)
             {
-                EnterVR();
+                //EnterVR();
             }
         }
     }

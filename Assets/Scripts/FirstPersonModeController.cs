@@ -1,129 +1,161 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
+// TODO: Find a way to simplify this code and make it better to use
 public class FirstPersonModeController : MonoBehaviour
 {
-    // References
+    [Header("Player References")]
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private CharacterController characterController;
 
-    // Player settings
+    [Header("Player Settings")]
     [SerializeField] private float cameraSensitivity;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float moveInputDeadZone;
 
-    // Touch detection
+    // Touch Detection
     private int leftFingerId, rightFingerId;
     private float halfScreenWidth;
 
-    // Camera control
+    // Camera Controls
     private Vector2 lookInput;
     private float cameraPitch;
 
-    // Player movement
+    // Player Movement
     private Vector2 moveTouchStartPosition;
     private Vector2 moveInput;
 
     // Start is called before the first frame update
     void Start()
     {
-        // id = -1 means the finger is not being tracked
+        // Track the current status of each finger input
         leftFingerId = -1;
         rightFingerId = -1;
 
-        // only calculate once
+        // Define the half point of the screen
         halfScreenWidth = Screen.width / 2;
 
-        // calculate the movement input dead zone
+        // Calculate areas where input cannot be registered
         moveInputDeadZone = Mathf.Pow(Screen.height / moveInputDeadZone, 2);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Handles input
+        // Keep checking for Touch Inputs
         GetTouchInput();
 
-
-        if (rightFingerId != -1) {
-            // Ony look around if the right finger is being tracked
-            Debug.Log("Rotating");
+        // Right Finger controls looking around
+        if (rightFingerId != -1)
+        {
             LookAround();
         }
 
+        // Left Finger controls movement
         if (leftFingerId != -1)
         {
-            // Ony move if the left finger is being tracked
-            Debug.Log("Moving");
             Move();
         }
     }
-
-    void GetTouchInput() {
-        // Iterate through all the detected touches
-        for (int i = 0; i < Input.touchCount; i++)
+    
+    void GetTouchInput()
+    {
+        // Find a touchscreen
+        if (Touchscreen.current == null)
         {
+            return;
+        }
 
-            Touch t = Input.GetTouch(i);
+        // Store a bool for the current status of each finger input
+        bool leftFingerSeen = false;
+        bool rightFingerSeen = false;
 
-            // Check each touch's phase
-            switch (t.phase)
+        // Check through each input found
+        foreach (var touch in Touchscreen.current.touches)
+        {
+            var phase = touch.phase.ReadValue();
+
+            if (phase == UnityEngine.InputSystem.TouchPhase.None)
             {
-                case TouchPhase.Began:
-
-                    if (t.position.x < halfScreenWidth && leftFingerId == -1)
-                    {
-                        // Start tracking the left finger if it was not previously being tracked
-                        leftFingerId = t.fingerId;
-
-                        // Set the start position for the movement control finger
-                        moveTouchStartPosition = t.position;
-                    }
-                    else if (t.position.x > halfScreenWidth && rightFingerId == -1)
-                    {
-                        // Start tracking the rightfinger if it was not previously being tracked
-                        rightFingerId = t.fingerId;
-                    }
-
-                    break;
-                case TouchPhase.Ended:
-                case TouchPhase.Canceled:
-
-                    if (t.fingerId == leftFingerId)
-                    {
-                        // Stop tracking the left finger
-                        leftFingerId = -1;
-                        Debug.Log("Stopped tracking left finger");
-                    }
-                    else if (t.fingerId == rightFingerId)
-                    {
-                        // Stop tracking the right finger
-                        rightFingerId = -1;
-                        Debug.Log("Stopped tracking right finger");
-                    }
-
-                    break;
-                case TouchPhase.Moved:
-
-                    // Get input for looking around
-                    if (t.fingerId == rightFingerId)
-                    {
-                        lookInput = t.deltaPosition * cameraSensitivity * Time.deltaTime;
-                    }
-                    else if (t.fingerId == leftFingerId) {
-
-                        // calculating the position delta from the start position
-                        moveInput = t.position - moveTouchStartPosition;
-                    }
-
-                    break;
-                case TouchPhase.Stationary:
-                    // Set the look input to zero if the finger is still
-                    if (t.fingerId == rightFingerId)
-                    {
-                        lookInput = Vector2.zero;
-                    }
-                    break;
+                continue;
             }
+
+            int fingerId = touch.touchId.ReadValue();
+            Vector2 position = touch.position.ReadValue();
+            Vector2 delta = touch.delta.ReadValue();
+            
+            if (fingerId == leftFingerId)
+            {
+                leftFingerSeen = true;
+
+                if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                    phase == UnityEngine.InputSystem.TouchPhase.Stationary)
+                {
+                    moveInput = position - moveTouchStartPosition;
+                }
+            }
+            
+            if (fingerId == rightFingerId)
+            {
+                rightFingerSeen = true;
+
+                if (phase == UnityEngine.InputSystem.TouchPhase.Moved)
+                {
+                    lookInput = delta * cameraSensitivity;
+                }
+                else if (phase == UnityEngine.InputSystem.TouchPhase.Stationary)
+                {
+                    lookInput = Vector2.zero;
+                }
+            }
+            
+            if (phase == UnityEngine.InputSystem.TouchPhase.Began)
+            {
+                if (position.x < halfScreenWidth && leftFingerId == -1)
+                {
+                    leftFingerId = fingerId;
+                    leftFingerSeen = true;
+
+                    moveTouchStartPosition = position;
+                    moveInput = Vector2.zero;
+                }
+                else if (position.x >= halfScreenWidth && rightFingerId == -1)
+                {
+                    rightFingerId = fingerId;
+                    rightFingerSeen = true;
+
+                    lookInput = Vector2.zero;
+                }
+            }
+            
+            if (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
+            phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+            {
+                if (fingerId == leftFingerId)
+                {
+                    leftFingerId = -1;
+                    moveInput = Vector2.zero;
+                    leftFingerSeen = false;
+                }
+
+                if (fingerId == rightFingerId)
+                {
+                    rightFingerId = -1;
+                    lookInput = Vector2.zero;
+                    rightFingerSeen = false;
+                }
+            }
+        }
+        
+        if (leftFingerId != -1 && !leftFingerSeen)
+        {
+            leftFingerId = -1;
+            moveInput = Vector2.zero;
+        }
+
+        if (rightFingerId != -1 && !rightFingerSeen)
+        {
+            rightFingerId = -1;
+            lookInput = Vector2.zero;
         }
     }
 
@@ -143,7 +175,8 @@ public class FirstPersonModeController : MonoBehaviour
         if (moveInput.sqrMagnitude <= moveInputDeadZone) return;
 
         // Multiply the normalized direction by the speed
-        Vector2 movementDirection = moveInput.normalized * moveSpeed * Time.deltaTime;
+        Vector2 movementDirection = moveInput.normalized * moveSpeed;
+        
         // Move relatively to the local transform's direction
         characterController.Move(transform.right * movementDirection.x + transform.forward * movementDirection.y);
     }
