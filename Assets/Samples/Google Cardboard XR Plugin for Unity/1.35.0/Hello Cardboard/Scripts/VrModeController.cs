@@ -40,6 +40,15 @@ public class VrModeController : MonoBehaviour
     // Main camera from the scene.
     private Camera _mainCamera;
 
+    private int fingerID;
+    
+    // Player Movement
+    private Vector2 moveTouchStartPosition;
+    private Vector2 moveInput;
+    
+    [SerializeField] private CharacterController characterController;
+    [SerializeField] private float moveSpeed;
+
     /// <summary>
     /// Gets a value indicating whether the screen has been touched this frame.
     /// </summary>
@@ -85,6 +94,8 @@ public class VrModeController : MonoBehaviour
         {
             Api.ScanDeviceParams();
         }
+
+        fingerID = -1;
     }
 
     /// <summary>
@@ -92,6 +103,14 @@ public class VrModeController : MonoBehaviour
     /// </summary>
     public void Update()
     {
+        GetTouchInput();
+        
+        // Left Finger controls movement
+        if (fingerID != -1)
+        {
+            Move();
+        }
+        
         if (_isVrModeEnabled)
         {
             if (Api.IsCloseButtonPressed)
@@ -115,6 +134,80 @@ public class VrModeController : MonoBehaviour
                 //EnterVR();
             }
         }
+    }
+    
+    void GetTouchInput()
+    {
+        // Find a touchscreen
+        if (Touchscreen.current == null)
+        {
+            return;
+        }
+
+        // Store a bool for the current status of each finger input
+        bool fingerSeen = false;
+
+        // Check through each input found
+        foreach (var touch in Touchscreen.current.touches)
+        {
+            var phase = touch.phase.ReadValue();
+
+            if (phase == UnityEngine.InputSystem.TouchPhase.None)
+            {
+                continue;
+            }
+
+            int newFingerID = touch.touchId.ReadValue();
+            Vector2 position = touch.position.ReadValue();
+            Vector2 delta = touch.delta.ReadValue();
+            
+            if (newFingerID == fingerID)
+            {
+                fingerSeen = true;
+
+                if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                    phase == UnityEngine.InputSystem.TouchPhase.Stationary)
+                {
+                    moveInput = position - moveTouchStartPosition;
+                }
+            }
+            
+            if (phase == UnityEngine.InputSystem.TouchPhase.Began)
+            {
+                if (fingerID == -1)
+                {
+                    fingerID = newFingerID;
+                    fingerSeen = true;
+                    moveTouchStartPosition = position;
+                    moveInput = Vector2.zero;
+                }
+            }
+            
+            if (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
+            phase == UnityEngine.InputSystem.TouchPhase.Canceled)
+            {
+                if (newFingerID == fingerID)
+                {
+                    fingerID = -1;
+                    moveInput = Vector2.zero; 
+                    fingerSeen = false;
+                }
+            }
+        }
+        
+        if (fingerID != -1 && !fingerSeen)
+        {
+            fingerID = -1;
+            moveInput = Vector2.zero;
+        }
+    }
+    
+    void Move() {
+        // Multiply the normalized direction by the speed
+        Vector2 movementDirection = moveInput.normalized * moveSpeed;
+        
+        // Move relatively to the local transform's direction
+        characterController.Move(transform.right * movementDirection.x + transform.forward * movementDirection.y);
     }
 
     /// <summary>
