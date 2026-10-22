@@ -11,6 +11,7 @@ public class FirstPersonModeController : MonoBehaviour
     [Header("Player Settings")]
     [SerializeField] private float cameraSensitivity;
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float gravity = -9.81f;
     [SerializeField] private float moveInputDeadZone;
 
     // Touch Detection
@@ -24,6 +25,7 @@ public class FirstPersonModeController : MonoBehaviour
     // Player Movement
     private Vector2 moveTouchStartPosition;
     private Vector2 moveInput;
+    private float verticalVelocity;
 
     // Start is called before the first frame update
     void Start()
@@ -169,16 +171,34 @@ public class FirstPersonModeController : MonoBehaviour
         transform.Rotate(transform.up, lookInput.x);
     }
 
-    void Move() {
+    void Move()
+    {
+        // Horizontal touch movement
+        Vector3 movement = Vector3.zero;
 
-        // Don't move if the touch delta is shorter than the designated dead zone
-        if (moveInput.sqrMagnitude <= moveInputDeadZone) return;
+        if (moveInput.sqrMagnitude > moveInputDeadZone)
+        {
+            Vector2 movementDirection = moveInput.normalized;
 
-        // Multiply the normalized direction by the speed
-        Vector2 movementDirection = moveInput.normalized * moveSpeed;
-        
-        // Move relatively to the local transform's direction
-        characterController.Move(transform.right * movementDirection.x + transform.forward * movementDirection.y);
+            movement =
+                transform.right * movementDirection.x +
+                transform.forward * movementDirection.y;
+
+            movement *= moveSpeed;
+        }
+
+        // Apply gravity while not grounded
+        if (characterController.isGrounded && verticalVelocity < 0f)
+        {
+            verticalVelocity = -2f;
+        }
+
+        verticalVelocity += gravity * Time.deltaTime;
+
+        // Combine horizontal movement and vertical velocity
+        movement.y = verticalVelocity;
+
+        characterController.Move(movement * Time.deltaTime);
     }
 
 }

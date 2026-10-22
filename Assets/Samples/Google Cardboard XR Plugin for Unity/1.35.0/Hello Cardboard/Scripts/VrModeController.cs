@@ -103,13 +103,13 @@ public class VrModeController : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        GetTouchInput();
+        //GetTouchInput();
         
         // Left Finger controls movement
-        if (fingerID != -1)
+        /*if (fingerID != -1)
         {
             Move();
-        }
+        }*/
         
         if (_isVrModeEnabled)
         {
