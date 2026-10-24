@@ -49,13 +49,13 @@ public class FirstPersonModeController : MonoBehaviour
         // Right Finger controls looking around
         if (rightFingerId != -1)
         {
-            LookAround();
+            Move();
         }
 
         // Left Finger controls movement
         if (leftFingerId != -1)
         {
-            Move();
+            LookAround();
         }
     }
     
@@ -88,18 +88,6 @@ public class FirstPersonModeController : MonoBehaviour
             if (fingerId == leftFingerId)
             {
                 leftFingerSeen = true;
-
-                if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
-                    phase == UnityEngine.InputSystem.TouchPhase.Stationary)
-                {
-                    moveInput = position - moveTouchStartPosition;
-                }
-            }
-            
-            if (fingerId == rightFingerId)
-            {
-                rightFingerSeen = true;
-
                 if (phase == UnityEngine.InputSystem.TouchPhase.Moved)
                 {
                     lookInput = delta * cameraSensitivity;
@@ -110,6 +98,16 @@ public class FirstPersonModeController : MonoBehaviour
                 }
             }
             
+            if (fingerId == rightFingerId)
+            {
+                rightFingerSeen = true;
+                if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
+                    phase == UnityEngine.InputSystem.TouchPhase.Stationary)
+                {
+                    moveInput = position - moveTouchStartPosition;
+                }
+            }
+            
             if (phase == UnityEngine.InputSystem.TouchPhase.Began)
             {
                 if (position.x < halfScreenWidth && leftFingerId == -1)
@@ -117,15 +115,14 @@ public class FirstPersonModeController : MonoBehaviour
                     leftFingerId = fingerId;
                     leftFingerSeen = true;
 
-                    moveTouchStartPosition = position;
-                    moveInput = Vector2.zero;
+                    lookInput = Vector2.zero;
                 }
                 else if (position.x >= halfScreenWidth && rightFingerId == -1)
                 {
                     rightFingerId = fingerId;
                     rightFingerSeen = true;
-
-                    lookInput = Vector2.zero;
+                    moveTouchStartPosition = position;
+                    moveInput = Vector2.zero;
                 }
             }
             
@@ -135,14 +132,14 @@ public class FirstPersonModeController : MonoBehaviour
                 if (fingerId == leftFingerId)
                 {
                     leftFingerId = -1;
-                    moveInput = Vector2.zero;
+                    lookInput = Vector2.zero;
                     leftFingerSeen = false;
                 }
 
                 if (fingerId == rightFingerId)
                 {
                     rightFingerId = -1;
-                    lookInput = Vector2.zero;
+                    moveInput = Vector2.zero;
                     rightFingerSeen = false;
                 }
             }
@@ -151,13 +148,13 @@ public class FirstPersonModeController : MonoBehaviour
         if (leftFingerId != -1 && !leftFingerSeen)
         {
             leftFingerId = -1;
-            moveInput = Vector2.zero;
+            lookInput = Vector2.zero;
         }
 
         if (rightFingerId != -1 && !rightFingerSeen)
         {
             rightFingerId = -1;
-            lookInput = Vector2.zero;
+            moveInput = Vector2.zero;
         }
     }
 

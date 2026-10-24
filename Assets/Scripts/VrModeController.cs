@@ -103,14 +103,6 @@ public class VrModeController : MonoBehaviour
     /// </summary>
     public void Update()
     {
-        //GetTouchInput();
-        
-        // Left Finger controls movement
-        /*if (fingerID != -1)
-        {
-            Move();
-        }*/
-        
         if (_isVrModeEnabled)
         {
             if (Api.IsCloseButtonPressed)
@@ -242,8 +234,9 @@ public class VrModeController : MonoBehaviour
 
     /// <summary>
     /// Enters VR mode.
+    /// NOTE: Originally this function was private, but it has been made public to allow for interaction on buttons
     /// </summary>
-    private void EnterVR()
+    public void EnterVR()
     {
         StartCoroutine(StartXR());
         if (Api.HasNewDeviceParams())
