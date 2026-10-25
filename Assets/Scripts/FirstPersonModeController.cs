@@ -1,7 +1,11 @@
+// FirstPersonController.cs
+// Ryan James Bernal
+
+// Purpose: Provide the user the ability to navigate through the village
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// TODO: Find a way to simplify this code and make it better to use
 public class FirstPersonModeController : MonoBehaviour
 {
     [Header("Player References")]
@@ -81,13 +85,17 @@ public class FirstPersonModeController : MonoBehaviour
                 continue;
             }
 
+            // Get values from the touch input
             int fingerId = touch.touchId.ReadValue();
             Vector2 position = touch.position.ReadValue();
             Vector2 delta = touch.delta.ReadValue();
             
+            // If the finger input matches the left finger input
             if (fingerId == leftFingerId)
             {
                 leftFingerSeen = true;
+                
+                // Check if the finger has moved and change the look input vector
                 if (phase == UnityEngine.InputSystem.TouchPhase.Moved)
                 {
                     lookInput = delta * cameraSensitivity;
@@ -98,9 +106,12 @@ public class FirstPersonModeController : MonoBehaviour
                 }
             }
             
+            // If the finger input matches the right finger input
             if (fingerId == rightFingerId)
             {
                 rightFingerSeen = true;
+                
+                // Check if the finger has started or stopped moving to adjust the move input
                 if (phase == UnityEngine.InputSystem.TouchPhase.Moved ||
                     phase == UnityEngine.InputSystem.TouchPhase.Stationary)
                 {
@@ -126,6 +137,7 @@ public class FirstPersonModeController : MonoBehaviour
                 }
             }
             
+            // Reset input vectors and states when touch is cancelled
             if (phase == UnityEngine.InputSystem.TouchPhase.Ended ||
             phase == UnityEngine.InputSystem.TouchPhase.Canceled)
             {
@@ -188,8 +200,7 @@ public class FirstPersonModeController : MonoBehaviour
                 Vector3.up
             ).normalized;
 
-            // Fallback in case the camera is looking
-            // almost perfectly straight up or down.
+            // Fallback in case the camera is looking straight up or down
             if (forward.sqrMagnitude < 0.001f)
             {
                 forward = Vector3.ProjectOnPlane(
@@ -211,7 +222,7 @@ public class FirstPersonModeController : MonoBehaviour
             movement = Vector3.ClampMagnitude(movement, 1f) * moveSpeed;
         }
 
-        // Gravity
+        // Account for Gravity
         if (characterController.isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
@@ -219,7 +230,7 @@ public class FirstPersonModeController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        // Combine horizontal movement with vertical velocity.
+        // Combine horizontal movement and vertical velocity.
         movement.y = verticalVelocity;
 
         characterController.Move(movement * Time.deltaTime);

@@ -1,3 +1,10 @@
+// VRLookWalk.cs
+// Ryan James Bernal
+
+/* NOTE: This script is not in use! This was an earlier script that was used to experiment with movement
+ inside VR Mode. This script is attached to the Player GameObject and can be toggled for fun inside the
+ Editor if desired */
+
 using UnityEngine;
 
 public class VRLookWalk : MonoBehaviour

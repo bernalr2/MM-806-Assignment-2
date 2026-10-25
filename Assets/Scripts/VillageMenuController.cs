@@ -1,3 +1,8 @@
+// VillageMenuController.cs
+// Ryan James Bernal
+
+// Purpose: Control the UI Menus in game
+
 using UnityEngine;
 
 public class VillageMenuController : MonoBehaviour
@@ -19,6 +24,7 @@ public class VillageMenuController : MonoBehaviour
         ShowInGameMenu();
     }
     
+    // Change each of the menus visibility depending on which is needed
     public void ToggleMenu(bool bIsTutorialMenuEnabled, bool bIsInGameMenuEnabled, bool bIsVillageMenuEnabled)
     {
         tutorialMenu.SetActive(bIsTutorialMenuEnabled);
@@ -26,21 +32,25 @@ public class VillageMenuController : MonoBehaviour
         villageMenu.SetActive(bIsVillageMenuEnabled);
     }
     
+    // Switch to the Tutorial Menu
     public void ShowTutorialMenu()
     {
         ToggleMenu(true, false, false);
     }
 
+    // Switch to the In Game Menu
     public void ShowInGameMenu()
     {
         ToggleMenu(false, true, false);
     }
 
+    // Switch to the Pause Menu
     public void ShowVillageMenu()
     {
         ToggleMenu(false, false, true);
     }
 
+    // Teleport the user back to their original starting point
     public void ResetPlayerPosition()
     {
         playerReference.transform.position = playerStartPosition;
