@@ -167,24 +167,51 @@ public class FirstPersonModeController : MonoBehaviour
         // horizontal (yaw) rotation
         transform.Rotate(transform.up, lookInput.x);
     }
-
+    
     void Move()
     {
-        // Horizontal touch movement
         Vector3 movement = Vector3.zero;
 
         if (moveInput.sqrMagnitude > moveInputDeadZone)
         {
             Vector2 movementDirection = moveInput.normalized;
 
-            movement =
-                transform.right * movementDirection.x +
-                transform.forward * movementDirection.y;
+            // Use the headset camera's orientation,
+            // projected onto the horizontal ground plane.
+            Vector3 forward = Vector3.ProjectOnPlane(
+                cameraTransform.forward,
+                Vector3.up
+            ).normalized;
 
-            movement *= moveSpeed;
+            Vector3 right = Vector3.ProjectOnPlane(
+                cameraTransform.right,
+                Vector3.up
+            ).normalized;
+
+            // Fallback in case the camera is looking
+            // almost perfectly straight up or down.
+            if (forward.sqrMagnitude < 0.001f)
+            {
+                forward = Vector3.ProjectOnPlane(
+                    transform.forward,
+                    Vector3.up
+                ).normalized;
+            }
+
+            if (right.sqrMagnitude < 0.001f)
+            {
+                right = Vector3.Cross(Vector3.up, forward).normalized;
+            }
+
+            movement =
+                right * movementDirection.x +
+                forward * movementDirection.y;
+
+            // Prevent diagonal movement from being faster.
+            movement = Vector3.ClampMagnitude(movement, 1f) * moveSpeed;
         }
 
-        // Apply gravity while not grounded
+        // Gravity
         if (characterController.isGrounded && verticalVelocity < 0f)
         {
             verticalVelocity = -2f;
@@ -192,10 +219,9 @@ public class FirstPersonModeController : MonoBehaviour
 
         verticalVelocity += gravity * Time.deltaTime;
 
-        // Combine horizontal movement and vertical velocity
+        // Combine horizontal movement with vertical velocity.
         movement.y = verticalVelocity;
 
         characterController.Move(movement * Time.deltaTime);
     }
-
 }
